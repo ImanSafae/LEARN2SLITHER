@@ -1,7 +1,6 @@
 from SnakeGame import Directions, SnakeGame, LastAction
 from enum import Enum
 import gymnasium as gym
-from Interpreter import Interpreter
 
 class Element(Enum):
     EMPTY = 0
@@ -13,7 +12,6 @@ class Environment(gym.Env):
     game: SnakeGame
     state: tuple
     last_reward: int
-    interpreter: Interpreter
     terminated: bool
 
     def __init__(self, game: SnakeGame):
@@ -28,7 +26,6 @@ class Environment(gym.Env):
         ))
         self.last_reward = 0
         self.state = self._get_obs()
-        self.interpreter = Interpreter(None, self)
         self.terminated = False
 
     def _map_element(self, element):

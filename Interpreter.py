@@ -1,16 +1,13 @@
 import pygame
-from Agent import Agent
 from Environment import Environment
-from SnakeGame import SnakeGame, Directions, GameStatus
+from SnakeGame import GameStatus
 from utils import Colors, draw_board
 
 class Interpreter:
-    agent: Agent
     environment: Environment
     surface: pygame.Surface
 
-    def __init__(self, agent: Agent, environment: Environment):
-        self.agent = agent
+    def __init__(self, environment: Environment):
         self.environment = environment
         pygame.init()
         self.surface = pygame.display.set_mode((550, 550))

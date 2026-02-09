@@ -7,14 +7,16 @@ class Agent():
 
     q_table: np.ndarray
     environment: Environment
+    interpreter: Interpreter
     epsilon: int
     learning_rate: int
     discount: int
 
-    def __init__(self, environment: Environment, learning_rate=0.01, epsilon=0.2):
+    def __init__(self, environment: Environment, learning_rate=0.01, epsilon=0.2, discount=0.99):
         self.environment = environment if environment != None else Environment(SnakeGame())
         self.learning_rate = learning_rate
         self.epsilon = epsilon
+        self.discount = discount
         self.q_table = np.zeros((environment.observation_space.n, environment.action_space.n))
 
     def q(self, state, action, reward):

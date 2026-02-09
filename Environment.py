@@ -1,4 +1,4 @@
-from SnakeGame import Directions, SnakeGame, LastAction
+from SnakeGame import Directions, SnakeGame, LastAction, GameStatus
 from enum import Enum
 import gymnasium as gym
 
@@ -13,11 +13,13 @@ class Environment(gym.Env):
     state: tuple
     last_reward: int
     terminated: bool
+    interpreter: object  # Référence optionnelle à l'Interpreter
 
-    def __init__(self, game: SnakeGame):
+    def __init__(self, game: SnakeGame, interpreter=None):
         if game == None:
             game = SnakeGame()
         self.game = game
+        self.interpreter = interpreter
         self.size = game.frame_height
         self.action_space = gym.spaces.Discrete(3)
         self.observation_space = gym.spaces.Tuple((
@@ -29,19 +31,18 @@ class Environment(gym.Env):
         self.terminated = False
 
     def _map_element(self, element):
-        match element:
-            case 0:
-                return Element.EMPTY.value
-            case ord('R'):
-                return Element.RED_APPLE.value
-            case ord('G'):
-                return Element.GREEN_APPLE.value
-            case ord('W'):
-                return Element.OBSTACLE.value
-            case ord('S'):
-                return Element.OBSTACLE.value
-            case _:
-                return Element.EMPTY.value
+        if element == 0:
+            return Element.EMPTY.value
+        elif element == ord('R'):
+            return Element.RED_APPLE.value
+        elif element == ord('G'):
+            return Element.GREEN_APPLE.value
+        elif element == ord('W'):
+            return Element.OBSTACLE.value
+        elif element == ord('S'):
+            return Element.OBSTACLE.value
+        else:
+            return Element.EMPTY.value
 
     def _get_obs(self):
         """
@@ -90,7 +91,7 @@ class Environment(gym.Env):
     def step(self, action):
         action_direction = self.map_action_to_direction(action, self.game.current_direction)
         self.game.move_snake(action_direction)
-        terminated = self.game.status == SnakeGame.GameStatus.GAME_OVER
+        terminated = self.game.status == GameStatus.GAME_OVER
         state = self._get_obs()
         reward = 0
         if terminated:
@@ -104,6 +105,7 @@ class Environment(gym.Env):
         self.last_reward = reward
         self.state = state
         self.terminated = terminated
-        self.interpreter.update(state, reward, terminated)
+        if self.interpreter:
+            self.interpreter.update(state, reward, terminated, self.game)
         return state, reward, terminated
         

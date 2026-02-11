@@ -37,7 +37,11 @@ class Agent():
         max_future_q = np.max(self.q_table[next_state])
         new_q_value = (1 - self.learning_rate) * current_q_value + self.learning_rate * (reward + self.discount * max_future_q)
         return new_q_value
-        
+    
+    def decay_epsilon(self):
+        self.epsilon *= 0.9
+        if self.epsilon < 0.01:
+            self.epsilon = 0.01
 
     def choose_action(self, state):
         # Initialiser l'état s'il n'existe pas
@@ -75,6 +79,7 @@ class Agent():
     def train(self, episodes):
         for episode in range(episodes):
             self.learn()
+            self.decay_epsilon()
             print("Snake length at episode", episode, ":", self.last_snake_length)
         
 

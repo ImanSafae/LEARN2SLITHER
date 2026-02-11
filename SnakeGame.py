@@ -40,7 +40,7 @@ class SnakeGame():
         self.frame_width = self.width + 2
         self.frame_height = self.height + 2
         self.board = np.zeros(self.frame_width * self.frame_height, dtype=int)
-        print(f"Initialized board of size {self.width}x{self.height}: {len(self.board)}")
+        # print(f"Initialized board of size {self.width}x{self.height}: {len(self.board)}")
         self.__init_walls()
         self.__init_snake()
         self.__init_apples()
@@ -112,10 +112,10 @@ class SnakeGame():
         elif self.board[new_head_position] == 0:
             self.__update_snake_position(current_head_position, new_head_position)
             self.current_direction = Directions.UP
-            print("Moved Up")
+            # print("Moved Up")
             lastAction = LastAction.MOVE
         else:
-            print("Checking collisions, new head position collides with ", self.board[new_head_position])
+            # print("Checking collisions, new head position collides with ", self.board[new_head_position])
             self.__check_collisions(current_head_position, new_head_position, Directions.UP)
 
     def move_snake(self, direction: Directions):
@@ -145,10 +145,10 @@ class SnakeGame():
         elif self.board[new_head_position] == 0:
             self.__update_snake_position(current_head_position, new_head_position)
             self.current_direction = Directions.DOWN
-            print("Moved Down")
+            # print("Moved Down")
             self.lastAction = LastAction.MOVE
         else:
-            print("Checking collisions, new head position collides with ", self.board[new_head_position])
+            # print("Checking collisions, new head position collides with ", self.board[new_head_position])
             self.__check_collisions(current_head_position, new_head_position, Directions.DOWN)
     
     def __left(self):
@@ -164,10 +164,10 @@ class SnakeGame():
         elif self.board[new_head_position] == 0:
             self.__update_snake_position(current_head_position, new_head_position)
             self.current_direction = Directions.LEFT
-            print("Moved Left")
+            # print("Moved Left")
             self.lastAction = LastAction.MOVE
         else:
-            print("Checking collisions, new head position collides with ", self.board[new_head_position])
+            # print("Checking collisions, new head position collides with ", self.board[new_head_position])
             self.__check_collisions(current_head_position, new_head_position, Directions.LEFT)
     
     def __right(self):
@@ -183,10 +183,10 @@ class SnakeGame():
         elif self.board[new_head_position] == 0:
             self.__update_snake_position(current_head_position, new_head_position)
             self.current_direction = Directions.RIGHT
-            print("Moved Right")
+            # print("Moved Right")
             self.lastAction = LastAction.MOVE
         else:
-            print("Checking collisions, new head position collides with ", self.board[new_head_position])
+            # print("Checking collisions, new head position collides with ", self.board[new_head_position])
             self.__check_collisions(current_head_position, new_head_position, Directions.RIGHT)
 
     def __update_snake_position(self, current_head_position: int, new_head_position: int):
@@ -295,7 +295,7 @@ class SnakeGame():
         if apple_type not in ['R', 'G']:
             raise ValueError("Invalid apple type")
         # current_pos = np.where(self.board == ord(apple_type))
-        print("Current apple position(s): ", current_pos)
+        # print("Current apple position(s): ", current_pos)
         new_apple_position: int = random.randint(0, self.width * self.height - 1)
         while self.board[new_apple_position] != 0:
             new_apple_position = random.randint(0, self.width * self.height - 1)

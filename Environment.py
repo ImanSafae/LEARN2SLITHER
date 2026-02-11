@@ -101,7 +101,7 @@ class Environment(gym.Env):
         elif self.game.lastAction == LastAction.RED_APPLE:
             reward = -2
         elif self.game.lastAction == LastAction.MOVE:
-            reward = -1
+            reward = 0
         self.last_reward = reward
         self.state = state
         self.terminated = terminated

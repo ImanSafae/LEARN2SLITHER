@@ -37,6 +37,11 @@ class Interpreter:
             font = pygame.font.SysFont(None, 55)
             text = font.render("GAME OVER", True, Colors.RED.value)
             self.surface.blit(text, (175, 225))
+        elif (game.status == GameStatus.VICTORY):
+            self.surface.fill(Colors.WHITE.value)
+            font = pygame.font.SysFont(None, 55)
+            text = font.render("VICTORY!", True, Colors.GREEN.value)
+            self.surface.blit(text, (175, 225))
         pygame.display.update()
 
     def update(self, state: tuple, reward: int, terminated: bool, game: SnakeGame):

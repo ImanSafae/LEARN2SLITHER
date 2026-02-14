@@ -105,8 +105,9 @@ class Environment(gym.Env):
         
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
+        width, height = self.game.width, self.game.height
         del self.game
-        self.game = SnakeGame()
+        self.game = SnakeGame(width=width, height=height)
         self._agent_location = self.game.snake[0]
         self.steps = 0
         self.terminated = False
@@ -121,15 +122,16 @@ class Environment(gym.Env):
         self.game.move_snake(action_direction)
         if self.steps >= self.max_steps:
             self.game.status = GameStatus.GAME_OVER
-            self.death_reason = "max steps exceeded"
         elif self.game.status == GameStatus.GAME_OVER and self.steps < self.max_steps:
             self.death_reason = "collision"
-        terminated = self.game.status == GameStatus.GAME_OVER
+        terminated = self.game.status == GameStatus.GAME_OVER or self.game.status == GameStatus.VICTORY
         state = self._get_obs()
         new_min_dist = min([d for d in state[1] if d > 0], default=0)
         reward = 0
-        if terminated:
+        if terminated and self.game.status == GameStatus.GAME_OVER:
             reward = -100
+        elif terminated and self.game.status == GameStatus.VICTORY:
+            reward = 500
         elif self.game.lastAction == LastAction.GREEN_APPLE:
             reward = 100
         elif self.game.lastAction == LastAction.RED_APPLE:

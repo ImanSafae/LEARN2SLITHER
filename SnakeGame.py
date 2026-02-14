@@ -268,7 +268,7 @@ class SnakeGame():
     def __check_collisions(self, current_head_position: int, new_head_position: int, direction: Directions):
         if self.board[new_head_position] == ord('W') or self.board[new_head_position] == ord('S'):
             self.status = GameStatus.GAME_OVER
-            print("Game Over!")
+            # print("Game Over!")
             self.lastAction = LastAction.LOST
         elif self.board[new_head_position] == ord('G'):
             self.__grow_snake()
@@ -279,7 +279,7 @@ class SnakeGame():
         elif self.board[new_head_position] == ord('R'):
             if (len(self.snake) == 1):
                 self.status = GameStatus.GAME_OVER
-                print("Game Over!")
+                # print("Game Over!")
                 self.lastAction = LastAction.LOST
             else:
                 self.__reduce_snake()

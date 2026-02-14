@@ -63,7 +63,12 @@ class Agent():
             action = np.random.choice(self.environment.action_space.n)
         else:
             # exploitation
-            action = np.argmax(self.q_table[state])
+            # action = np.argmax(self.q_table[state])
+            # print("all values:", self.q_table[state])
+            best_values = np.max(self.q_table[state])
+            # print("best values:", best_values)
+            best_actions = np.where(self.q_table[state] == best_values)[0]
+            action = np.random.choice(best_actions)
         return action
     
     def learn(self):
@@ -112,7 +117,7 @@ class Agent():
                 state = next_state
                 episode_over = terminated
                 if self.sleep_time:
-                    print(f"Sleeping for {self.sleep_time} seconds...")
+                    # print(f"Sleeping for {self.sleep_time} seconds...")
                     time.sleep(self.sleep_time)
 
     

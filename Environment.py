@@ -2,12 +2,14 @@ from SnakeGame import Directions, SnakeGame, LastAction, GameStatus
 from enum import Enum
 import gymnasium as gym
 
+
 class Element(Enum):
     EMPTY = 0
     DANGER = 1
     GREEN_APPLE = 2
     RED_APPLE = 3
     DEATH = 4
+
 
 class Environment(gym.Env):
     game: SnakeGame
@@ -20,15 +22,15 @@ class Environment(gym.Env):
     death_reason: str
 
     def __init__(self, game: SnakeGame, interpreter=None, max_steps=200):
-        if game == None:
+        if game is None:
             game = SnakeGame()
         self.game = game
         self.interpreter = interpreter
         self.size = game.frame_width
         self.action_space = gym.spaces.Discrete(3)
         self.observation_space = gym.spaces.Tuple((
-            gym.spaces.Tuple((gym.spaces.Discrete(3), gym.spaces.Discrete(3), gym.spaces.Discrete(4))), #adjacent elements: EMPTY/DANGER/GREEN_APPLE/RED_APPLE
-            gym.spaces.Tuple((gym.spaces.Discrete(3), gym.spaces.Discrete(3), gym.spaces.Discrete(3))) #distance bins to green apple: 0/1/2
+            gym.spaces.Tuple((gym.spaces.Discrete(3), gym.spaces.Discrete(3), gym.spaces.Discrete(4))),  # adjacent elements: EMPTY/DANGER/GREEN_APPLE/RED_APPLE
+            gym.spaces.Tuple((gym.spaces.Discrete(3), gym.spaces.Discrete(3), gym.spaces.Discrete(3)))  # distance bins to green apple: 0/1/2
         ))
         self.last_reward = 0
         self.state = self._get_obs()
@@ -50,7 +52,7 @@ class Environment(gym.Env):
             return Element.DANGER.value
         else:
             return Element.EMPTY.value
-        
+
     def _distance_to_green_apple(self, row):
         if not ord('G') in row:
             return 0
@@ -79,16 +81,13 @@ class Environment(gym.Env):
             Directions.LEFT: ((+self.size, -1, -self.size), (self.game.get_down_row, self.game.get_left_row, self.game.get_up_row)),
             Directions.RIGHT: ((-self.size, +1, +self.size), (self.game.get_up_row, self.game.get_right_row, self.game.get_down_row))
         }
-        
         offsets, row_functions = direction_map[current_direction]
         left_pos, up_pos, right_pos = [head_position + offset for offset in offsets]
         left_row, up_row, right_row = [fn() for fn in row_functions]
-        
         left_element = self._map_element(self.game.board[left_pos])
         up_element = self._map_element(self.game.board[up_pos])
         right_element = self._map_element(self.game.board[right_pos])
-        
-        
+
         adjacents = (left_element, up_element, right_element)
         # green_apples = (1 if ord('G') in left_row else 0, 1 if ord('G') in up_row else 0, 1 if ord('G') in right_row else 0)
         distance_to_apples = (self._distance_to_green_apple(left_row), self._distance_to_green_apple(up_row), self._distance_to_green_apple(right_row))
@@ -102,7 +101,7 @@ class Environment(gym.Env):
         offset = action - 1
         new_index = (current_index + offset) % 4
         return directions[new_index]
-        
+
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
         width, height = self.game.width, self.game.height
@@ -156,4 +155,3 @@ class Environment(gym.Env):
         if self.interpreter:
             self.interpreter.update(state, reward, terminated, self.game)
         return state, reward, terminated
-        

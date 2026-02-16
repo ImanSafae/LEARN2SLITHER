@@ -1,7 +1,7 @@
 import pygame
 from SnakeGame import SnakeGame, Directions, GameStatus
-from enum import Enum
 from utils import Colors, draw_board
+
 
 def init_window(game: SnakeGame):
     pygame.init()
@@ -30,6 +30,7 @@ def init_window(game: SnakeGame):
             text = font.render("GAME OVER", True, Colors.RED.value)
             surface.blit(text, (175, 225))
         pygame.display.update()
+
 
 if __name__ == "__main__":
     game = SnakeGame()

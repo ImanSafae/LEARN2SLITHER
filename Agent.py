@@ -1,8 +1,8 @@
 import time
 import numpy as np
-from SnakeGame import SnakeGame, GameStatus
 from Environment import Element, Environment
 from Interpreter import Interpreter
+
 
 class Agent():
 
@@ -40,12 +40,11 @@ class Agent():
                 self.q_table[next_state] = np.zeros(self.environment.action_space.n) - 1000
             else:
                 self.q_table[next_state] = np.zeros(self.environment.action_space.n)
-        
         current_q_value = self.q_table[state][action]
         max_future_q = np.max(self.q_table[next_state])
         new_q_value = (1 - self.learning_rate) * current_q_value + self.learning_rate * (reward + self.discount * max_future_q)
         return new_q_value
-    
+
     def decay_epsilon(self):
         self.epsilon *= self.decay_rate
         if self.epsilon < 0.1:
@@ -55,7 +54,6 @@ class Agent():
         if state not in self.q_table:
             # print("New state encountered! :", state)
             self.q_table[state] = np.zeros(self.environment.action_space.n)
-        
         random_number = np.random.rand()
         if random_number < self.epsilon:
             # exploration
@@ -69,13 +67,15 @@ class Agent():
             # print("best values:", best_values)
             best_actions = np.where(self.q_table[state] == best_values)[0]
             action = np.random.choice(best_actions)
+            # print("chosen action:", action)
         return action
-    
+
     def learn(self):
         # if self.environment.game.status == GameStatus.GAME_OVER:
         episode_over = False
         state = self.environment.state
         while not episode_over:
+            # print(f"State: {state}, Epsilon: {self.epsilon:.3f}")
             action = self.choose_action(state)
             self.environment.step(action)
             next_state, reward, terminated = self.interpreter.get_step_result()
@@ -89,9 +89,10 @@ class Agent():
         self.lengths_history.append(len(self.environment.game.snake))
         self.last_snake_length = len(self.environment.game.snake)
         self.environment.reset()
-        
+
     def train(self, episodes):
         for episode in range(episodes):
+            # print(f"Starting episode {episode+1}/{episodes} with epsilon={self.epsilon:.3f}")
             self.learn()
             self.decay_epsilon()
             if episode % 1000 == 0:
@@ -119,6 +120,3 @@ class Agent():
                 if self.sleep_time:
                     # print(f"Sleeping for {self.sleep_time} seconds...")
                     time.sleep(self.sleep_time)
-
-    
-        

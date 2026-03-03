@@ -41,8 +41,8 @@ class SnakeGame():
         self.height = height
         self.frame_width = self.width + 2
         self.frame_height = self.height + 2
-        self.board = np.zeros(self.frame_width * self.frame_height, dtype=int)
-        # print(f"Initialized board of size {self.width}x{self.height}: {len(self.board)}")
+        self.board = np.zeros(
+            self.frame_width * self.frame_height, dtype=int)
         self.__init_walls()
         self.__init_snake()
         self.__init_apples()
@@ -73,52 +73,64 @@ class SnakeGame():
             i -= 1
 
     def __init_snake(self):
-        head_position: int = random.randint(0, self.width * self.height - 1)
+        head_position: int = random.randint(
+            0, self.width * self.height - 1)
         while self.board[head_position] != 0:
-            head_position = random.randint(0, self.width * self.height - 1)
-        self.snake = [head_position, head_position + self.width + 2, head_position + 2 * (self.width + 2)]
+            head_position = random.randint(
+                0, self.width * self.height - 1)
+        self.snake = [
+            head_position,
+            head_position + self.width + 2,
+            head_position + 2 * (self.width + 2)]
         self.board[head_position] = ord('H')
         self.board[head_position + self.width + 2] = ord('S')
         self.board[head_position + 2 * (self.width + 2)] = ord('S')
 
     def __init_apples(self):
-        red_apple_position: int = random.randint(0, self.width * self.height - 1)
-        while red_apple_position in self.snake or self.board[red_apple_position] != 0:
-            red_apple_position = random.randint(0, self.width * self.height - 1)
-        self.board[red_apple_position] = ord('R')
-        green_apple_position: int = random.randint(0, self.width * self.height - 1)
-        while self.board[green_apple_position] != 0:
-            green_apple_position = random.randint(0, self.width * self.height - 1)
-        self.board[green_apple_position] = ord('G')
-        green_apple_position: int = random.randint(0, self.width * self.height - 1)
-        while self.board[green_apple_position] != 0:
-            green_apple_position = random.randint(0, self.width * self.height - 1)
-        self.board[green_apple_position] = ord('G')
+        max_pos = self.width * self.height - 1
+        red_pos: int = random.randint(0, max_pos)
+        while (red_pos in self.snake
+               or self.board[red_pos] != 0):
+            red_pos = random.randint(0, max_pos)
+        self.board[red_pos] = ord('R')
+        green_pos: int = random.randint(0, max_pos)
+        while self.board[green_pos] != 0:
+            green_pos = random.randint(0, max_pos)
+        self.board[green_pos] = ord('G')
+        green_pos: int = random.randint(0, max_pos)
+        while self.board[green_pos] != 0:
+            green_pos = random.randint(0, max_pos)
+        self.board[green_pos] = ord('G')
 
     def print_board(self):
-        frame_width: int = self.width + 2
-        frame_height: int = self.height + 2
-        for i in range(frame_height):
-            row = self.board[i * frame_width:(i + 1) * frame_width]
-            print(" ".join(str(cell) if cell == 0 else chr(cell) for cell in row))
+        fw: int = self.width + 2
+        fh: int = self.height + 2
+        for i in range(fh):
+            row = self.board[i * fw:(i + 1) * fw]
+            print(" ".join(
+                str(c) if c == 0 else chr(c)
+                for c in row
+            ))
 
     def __up(self):
         if self.status == GameStatus.GAME_OVER:
             print("Game is over. Cannot move the snake.")
             return
-        current_head_position = self.snake[0]
-        new_head_position = current_head_position - self.frame_width
-        # if self.current_direction in [Directions.DOWN, Directions.UP]:
-        if self.current_direction == Directions.DOWN and len(self.snake) > 1:  # for controls test purposes, to be deleted and replaced with the above line once the snake moves by itself
+        cur = self.snake[0]
+        new = cur - self.frame_width
+        # if self.current_direction in
+        # [Directions.DOWN, Directions.UP]:
+        if (self.current_direction == Directions.DOWN
+                and len(self.snake) > 1):  # tmp
             print("Cannot move up")
-        elif self.board[new_head_position] == 0:
-            self.__update_snake_position(current_head_position, new_head_position)
+        elif self.board[new] == 0:
+            self.__update_snake_position(cur, new)
             self.current_direction = Directions.UP
-            # print("Moved Up")
             self.lastAction = LastAction.MOVE
         else:
-            # print("Checking collisions, new head position collides with ", self.board[new_head_position])
-            self.__check_collisions(current_head_position, new_head_position, Directions.UP)
+            self.__check_collisions(
+                cur, new, Directions.UP
+            )
 
     def move_snake(self, direction: Directions):
         if self.status == GameStatus.GAME_OVER:
@@ -138,60 +150,69 @@ class SnakeGame():
         if self.status == GameStatus.GAME_OVER:
             print("Game is over. Cannot move the snake.")
             return
-        current_head_position = self.snake[0]
-        new_head_position = current_head_position + self.frame_width
-        # if self.current_direction in [Directions.UP, Directions.DOWN]:
-        if self.current_direction == Directions.UP and len(self.snake) > 1:  # for controls test purposes, to be deleted and replaced with the above line once the snake moves by itself
+        cur = self.snake[0]
+        new = cur + self.frame_width
+        # if self.current_direction in
+        # [Directions.UP, Directions.DOWN]:
+        if (self.current_direction == Directions.UP
+                and len(self.snake) > 1):  # tmp
             print("Cannot move down")
             pass
-        elif self.board[new_head_position] == 0:
-            self.__update_snake_position(current_head_position, new_head_position)
+        elif self.board[new] == 0:
+            self.__update_snake_position(cur, new)
             self.current_direction = Directions.DOWN
-            # print("Moved Down")
             self.lastAction = LastAction.MOVE
         else:
-            # print("Checking collisions, new head position collides with ", self.board[new_head_position])
-            self.__check_collisions(current_head_position, new_head_position, Directions.DOWN)
+            self.__check_collisions(
+                cur, new, Directions.DOWN
+            )
 
     def __left(self):
         if self.status == GameStatus.GAME_OVER:
             print("Game is over. Cannot move the snake.")
             return
-        current_head_position = self.snake[0]
-        new_head_position = current_head_position - 1
-        # if self.current_direction in [Directions.RIGHT, Directions.LEFT]:
-        if self.current_direction == Directions.RIGHT and len(self.snake) > 1:  # for controls test purposes, to be deleted and replaced with the above line once the snake moves by itself
+        cur = self.snake[0]
+        new = cur - 1
+        # if self.current_direction in
+        # [Directions.RIGHT, Directions.LEFT]:
+        if (self.current_direction == Directions.RIGHT
+                and len(self.snake) > 1):  # tmp
             print("Cannot move left")
             pass
-        elif self.board[new_head_position] == 0:
-            self.__update_snake_position(current_head_position, new_head_position)
+        elif self.board[new] == 0:
+            self.__update_snake_position(cur, new)
             self.current_direction = Directions.LEFT
-            # print("Moved Left")
             self.lastAction = LastAction.MOVE
         else:
-            # print("Checking collisions, new head position collides with ", self.board[new_head_position])
-            self.__check_collisions(current_head_position, new_head_position, Directions.LEFT)
+            self.__check_collisions(
+                cur, new, Directions.LEFT
+            )
 
     def __right(self):
         if self.status == GameStatus.GAME_OVER:
             print("Game is over. Cannot move the snake.")
             return
-        current_head_position = self.snake[0]
-        new_head_position = current_head_position + 1
-        # if self.current_direction in [Directions.LEFT, Directions.RIGHT]:
-        if self.current_direction == Directions.LEFT and len(self.snake) > 1:  # for controls test purposes, to be deleted and replaced with the above line once the snake moves by itself
+        cur = self.snake[0]
+        new = cur + 1
+        # if self.current_direction in
+        # [Directions.LEFT, Directions.RIGHT]:
+        if (self.current_direction == Directions.LEFT
+                and len(self.snake) > 1):  # tmp
             print("Cannot move right")
             pass
-        elif self.board[new_head_position] == 0:
-            self.__update_snake_position(current_head_position, new_head_position)
+        elif self.board[new] == 0:
+            self.__update_snake_position(cur, new)
             self.current_direction = Directions.RIGHT
-            # print("Moved Right")
             self.lastAction = LastAction.MOVE
         else:
-            # print("Checking collisions, new head position collides with ", self.board[new_head_position])
-            self.__check_collisions(current_head_position, new_head_position, Directions.RIGHT)
+            self.__check_collisions(
+                cur, new, Directions.RIGHT
+            )
 
-    def __update_snake_position(self, current_head_position: int, new_head_position: int):
+    def __update_snake_position(
+        self, current_head_position: int,
+        new_head_position: int
+    ):
         if self.status == GameStatus.GAME_OVER:
             print("Game is over. Cannot move the snake.")
             return
@@ -215,9 +236,13 @@ class SnakeGame():
             current_head_position = self.snake[0]
             match self.current_direction:
                 case Directions.UP:
-                    new_tail_position = current_head_position + self.frame_width
+                    new_tail_position = (
+                        current_head_position
+                        + self.frame_width)
                 case Directions.DOWN:
-                    new_tail_position = current_head_position - self.frame_width
+                    new_tail_position = (
+                        current_head_position
+                        - self.frame_width)
                 case Directions.LEFT:
                     new_tail_position = current_head_position + 1
                 case Directions.RIGHT:
@@ -247,20 +272,32 @@ class SnakeGame():
                         new_tail_position = current_tail_position - 1
             case 1:
                 # going left
-                new_tail_position = current_tail_position + 1
+                new_tail_position = (
+                    current_tail_position + 1)
                 if self.board[new_tail_position] != 0:
-                    if self.board[current_tail_position + self.frame_width] == 0:
-                        new_tail_position = current_tail_position + self.frame_width
+                    fw = self.frame_width
+                    if self.board[
+                        current_tail_position + fw
+                    ] == 0:
+                        new_tail_position = (
+                            current_tail_position + fw)
                     else:
-                        new_tail_position = current_tail_position - self.frame_width
+                        new_tail_position = (
+                            current_tail_position - fw)
             case -1:
                 # going right
-                new_tail_position = current_tail_position - 1
+                new_tail_position = (
+                    current_tail_position - 1)
                 if self.board[new_tail_position] != 0:
-                    if self.board[current_tail_position + self.frame_width] == 0:
-                        new_tail_position = current_tail_position + self.frame_width
+                    fw = self.frame_width
+                    if self.board[
+                        current_tail_position + fw
+                    ] == 0:
+                        new_tail_position = (
+                            current_tail_position + fw)
                     else:
-                        new_tail_position = current_tail_position - self.frame_width
+                        new_tail_position = (
+                            current_tail_position - fw)
         self.snake.append(new_tail_position)
         self.board[new_tail_position] = ord('S')
 
@@ -272,29 +309,38 @@ class SnakeGame():
         self.board[tail_position] = 0
         self.snake.pop()
 
-    def __check_collisions(self, current_head_position: int, new_head_position: int, direction: Directions):
-        if self.board[new_head_position] == ord('W') or self.board[new_head_position] == ord('S'):
+    def __check_collisions(
+        self, current_head_position: int,
+        new_head_position: int,
+        direction: Directions
+    ):
+        cell = self.board[new_head_position]
+        if cell == ord('W') or cell == ord('S'):
             self.status = GameStatus.GAME_OVER
-            # print("Game Over!")
             self.lastAction = LastAction.LOST
-        elif self.board[new_head_position] == ord('G'):
+        elif cell == ord('G'):
             self.lastAction = LastAction.GREEN_APPLE
             self.current_direction = direction
             self.__grow_snake()
-            if (self.status == GameStatus.VICTORY):
+            if self.status == GameStatus.VICTORY:
                 return
-            self.__spawn_new_apple(new_head_position, 'G')
-            self.__update_snake_position(current_head_position, new_head_position)
-        elif self.board[new_head_position] == ord('R'):
-            if (len(self.snake) == 1):
+            self.__spawn_new_apple(
+                new_head_position, 'G')
+            self.__update_snake_position(
+                current_head_position,
+                new_head_position)
+        elif cell == ord('R'):
+            if len(self.snake) == 1:
                 self.status = GameStatus.GAME_OVER
-                # print("Game Over!")
                 self.lastAction = LastAction.LOST
             else:
                 self.__reduce_snake()
                 self.current_direction = direction
-                self.__spawn_new_apple(new_head_position, 'R')
-                self.__update_snake_position(current_head_position, new_head_position)
+                self.__spawn_new_apple(
+                    new_head_position, 'R')
+                self.__update_snake_position(
+                    current_head_position,
+                    new_head_position)
                 self.lastAction = LastAction.RED_APPLE
 
     def __spawn_new_apple(self, current_pos, apple_type: str):
@@ -326,7 +372,9 @@ class SnakeGame():
         row = []
         head_pos = self.snake[0]
         i = head_pos + 1
-        closest_right_wall = head_pos + (self.frame_width - (head_pos % self.frame_width)) - 1
+        mod = head_pos % self.frame_width
+        closest_right_wall = (
+            head_pos + (self.frame_width - mod) - 1)
         while i <= closest_right_wall:
             row.append(self.board[i])
             i += 1

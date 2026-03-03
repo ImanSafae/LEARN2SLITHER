@@ -25,10 +25,11 @@ def init_window(game: SnakeGame):
                     game.move_snake(Directions.RIGHT)
         draw_board(surface, game)
         if (game.status == GameStatus.GAME_OVER):
-            surface.fill(Colors.WHITE.value)
+            surface.fill(Colors.BACKGROUND.value)
             font = pygame.font.SysFont(None, 55)
-            text = font.render("GAME OVER", True, Colors.RED.value)
-            surface.blit(text, (175, 225))
+            text = font.render("GAME OVER", True, Colors.TEXT_GAME_OVER.value)
+            text_rect = text.get_rect(center=(275, 225))
+            surface.blit(text, text_rect)
         pygame.display.update()
 
 

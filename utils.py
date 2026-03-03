@@ -36,71 +36,132 @@ def draw_board(surface: pygame.Surface, game: SnakeGame):
     rect_width = 500 // game.frame_width
     rect_height = 500 // game.frame_height
 
-    for j in range(game.frame_height):
-        for i in range(game.frame_width):
-            x = 25 + i * rect_width
-            y = 25 + j * rect_height
-            rect = pygame.Rect(x, y, rect_width, rect_height)
-            if game.board[j * game.frame_width + i] != ord('W'):
+    fw = game.frame_width
+    fh = game.frame_height
+    rw = rect_width
+    rh = rect_height
+    for j in range(fh):
+        for i in range(fw):
+            x = 25 + i * rw
+            y = 25 + j * rh
+            rect = pygame.Rect(x, y, rw, rh)
+            idx = j * fw + i
+            if game.board[idx] != ord('W'):
                 if (i + j) % 2 == 0:
-                    pygame.draw.rect(surface, Colors.GRID_LIGHT.value, rect)
+                    pygame.draw.rect(
+                        surface,
+                        Colors.GRID_LIGHT.value,
+                        rect)
                 else:
-                    pygame.draw.rect(surface, Colors.GRID_DARK.value, rect)
-    for j in range(game.frame_height):
-        for i in range(game.frame_width):
-            x = 25 + i * rect_width
-            y = 25 + j * rect_height
-            rect = pygame.Rect(x, y, rect_width, rect_height)
-            inner_rect = pygame.Rect(x + 2, y + 2, rect_width - 4, rect_height - 4)
-            cell = game.board[j * game.frame_width + i]
+                    pygame.draw.rect(
+                        surface,
+                        Colors.GRID_DARK.value,
+                        rect)
+    for j in range(fh):
+        for i in range(fw):
+            x = 25 + i * rw
+            y = 25 + j * rh
+            rect = pygame.Rect(x, y, rw, rh)
+            inner = pygame.Rect(
+                x + 2, y + 2, rw - 4, rh - 4)
+            cell = game.board[j * fw + i]
+            cx = x + rw // 2
+            cy = y + rh // 2
+            ms = min(rw, rh)
             if cell == ord('W'):
-                pygame.draw.rect(surface, Colors.WALL_MAIN.value, rect)
-                pygame.draw.rect(surface, Colors.WALL_BORDER.value, rect, 2)
-                pygame.draw.line(surface, Colors.WALL_HIGHLIGHT.value,
-                               (x + 2, y + 2), (x + rect_width - 2, y + 2), 2)
-                pygame.draw.line(surface, Colors.WALL_HIGHLIGHT.value,
-                               (x + 2, y + 2), (x + 2, y + rect_height - 2), 2)
+                pygame.draw.rect(
+                    surface,
+                    Colors.WALL_MAIN.value, rect)
+                pygame.draw.rect(
+                    surface,
+                    Colors.WALL_BORDER.value,
+                    rect, 2)
+                whl = Colors.WALL_HIGHLIGHT.value
+                pygame.draw.line(
+                    surface, whl,
+                    (x + 2, y + 2),
+                    (x + rw - 2, y + 2), 2)
+                pygame.draw.line(
+                    surface, whl,
+                    (x + 2, y + 2),
+                    (x + 2, y + rh - 2), 2)
             elif cell == ord('S'):
-                pygame.draw.rect(surface, Colors.SNAKE_BODY.value, inner_rect, border_radius=6)
-                highlight_rect = pygame.Rect(x + 4, y + 4, rect_width - 8, rect_height // 2 - 4)
-                pygame.draw.rect(surface, Colors.SNAKE_BODY_LIGHT.value, highlight_rect, border_radius=4)
-                pygame.draw.rect(surface, Colors.SNAKE_OUTLINE.value, inner_rect, 2, border_radius=6)
+                pygame.draw.rect(
+                    surface,
+                    Colors.SNAKE_BODY.value,
+                    inner, border_radius=6)
+                hl_rect = pygame.Rect(
+                    x + 4, y + 4,
+                    rw - 8, rh // 2 - 4)
+                pygame.draw.rect(
+                    surface,
+                    Colors.SNAKE_BODY_LIGHT.value,
+                    hl_rect, border_radius=4)
+                pygame.draw.rect(
+                    surface,
+                    Colors.SNAKE_OUTLINE.value,
+                    inner, 2, border_radius=6)
             elif cell == ord('R'):
-                pygame.draw.circle(surface, Colors.RED_APPLE.value,
-                                 (x + rect_width // 2, y + rect_height // 2),
-                                 min(rect_width, rect_height) // 2 - 3)
-                pygame.draw.circle(surface, Colors.RED_APPLE_DARK.value,
-                                 (x + rect_width // 2 + 1, y + rect_height // 2 + 1),
-                                 min(rect_width, rect_height) // 2 - 5)
-                shine_x = x + rect_width // 2 - min(rect_width, rect_height) // 6
-                shine_y = y + rect_height // 2 - min(rect_width, rect_height) // 6
-                pygame.draw.circle(surface, Colors.RED_APPLE_SHINE.value,
-                                 (shine_x, shine_y),
-                                 min(rect_width, rect_height) // 8)
+                pygame.draw.circle(
+                    surface,
+                    Colors.RED_APPLE.value,
+                    (cx, cy), ms // 2 - 3)
+                pygame.draw.circle(
+                    surface,
+                    Colors.RED_APPLE_DARK.value,
+                    (cx + 1, cy + 1),
+                    ms // 2 - 5)
+                sx = cx - ms // 6
+                sy = cy - ms // 6
+                pygame.draw.circle(
+                    surface,
+                    Colors.RED_APPLE_SHINE.value,
+                    (sx, sy), ms // 8)
             elif cell == ord('G'):
-                pygame.draw.circle(surface, Colors.GREEN_APPLE.value,
-                                 (x + rect_width // 2, y + rect_height // 2),
-                                 min(rect_width, rect_height) // 2 - 3)
-                pygame.draw.circle(surface, Colors.GREEN_APPLE_DARK.value,
-                                 (x + rect_width // 2 + 1, y + rect_height // 2 + 1),
-                                 min(rect_width, rect_height) // 2 - 5)
-                shine_x = x + rect_width // 2 - min(rect_width, rect_height) // 6
-                shine_y = y + rect_height // 2 - min(rect_width, rect_height) // 6
-                pygame.draw.circle(surface, Colors.GREEN_APPLE_SHINE.value,
-                                 (shine_x, shine_y),
-                                 min(rect_width, rect_height) // 7)
+                pygame.draw.circle(
+                    surface,
+                    Colors.GREEN_APPLE.value,
+                    (cx, cy), ms // 2 - 3)
+                pygame.draw.circle(
+                    surface,
+                    Colors.GREEN_APPLE_DARK.value,
+                    (cx + 1, cy + 1),
+                    ms // 2 - 5)
+                sx = cx - ms // 6
+                sy = cy - ms // 6
+                pygame.draw.circle(
+                    surface,
+                    Colors.GREEN_APPLE_SHINE.value,
+                    (sx, sy), ms // 7)
             elif cell == ord('H'):
-                pygame.draw.rect(surface, Colors.SNAKE_HEAD.value, inner_rect, border_radius=8)
-                gradient_rect = pygame.Rect(x + 4, y + rect_height // 2,
-                                           rect_width - 8, rect_height // 2 - 2)
-                pygame.draw.rect(surface, Colors.SNAKE_HEAD_DARK.value, gradient_rect, border_radius=6)
-                pygame.draw.rect(surface, Colors.SNAKE_OUTLINE.value, inner_rect, 3, border_radius=8)
-                eye_size = max(2, min(rect_width, rect_height) // 8)
-                pygame.draw.circle(surface, (255, 255, 255),
-                                 (x + rect_width // 3, y + rect_height // 3), eye_size)
-                pygame.draw.circle(surface, (0, 0, 0),
-                                 (x + rect_width // 3, y + rect_height // 3), eye_size - 1)
-                pygame.draw.circle(surface, (255, 255, 255),
-                                 (x + 2 * rect_width // 3, y + rect_height // 3), eye_size)
-                pygame.draw.circle(surface, (0, 0, 0),
-                                 (x + 2 * rect_width // 3, y + rect_height // 3), eye_size - 1)
+                pygame.draw.rect(
+                    surface,
+                    Colors.SNAKE_HEAD.value,
+                    inner, border_radius=8)
+                grad = pygame.Rect(
+                    x + 4, y + rh // 2,
+                    rw - 8, rh // 2 - 2)
+                pygame.draw.rect(
+                    surface,
+                    Colors.SNAKE_HEAD_DARK.value,
+                    grad, border_radius=6)
+                pygame.draw.rect(
+                    surface,
+                    Colors.SNAKE_OUTLINE.value,
+                    inner, 3, border_radius=8)
+                es = max(2, ms // 8)
+                ex1 = x + rw // 3
+                ex2 = x + 2 * rw // 3
+                ey = y + rh // 3
+                pygame.draw.circle(
+                    surface, (255, 255, 255),
+                    (ex1, ey), es)
+                pygame.draw.circle(
+                    surface, (0, 0, 0),
+                    (ex1, ey), es - 1)
+                pygame.draw.circle(
+                    surface, (255, 255, 255),
+                    (ex2, ey), es)
+                pygame.draw.circle(
+                    surface, (0, 0, 0),
+                    (ex2, ey), es - 1)

@@ -20,17 +20,24 @@ class Environment(gym.Env):
     steps: int
     max_steps: int
     death_reason: str
+    step_by_step: bool
 
-    def __init__(self, game: SnakeGame, interpreter=None, max_steps=200):
+    def __init__(self, game: SnakeGame, interpreter=None,
+                 max_steps=200, step_by_step=False):
         if game is None:
             game = SnakeGame()
         self.game = game
         self.interpreter = interpreter
+        self.step_by_step = step_by_step
         self.size = game.frame_width
         self.action_space = gym.spaces.Discrete(3)
         self.observation_space = gym.spaces.Tuple((
-            gym.spaces.Tuple((gym.spaces.Discrete(3), gym.spaces.Discrete(3), gym.spaces.Discrete(4))),  # adjacent elements: EMPTY/DANGER/GREEN_APPLE/RED_APPLE
-            gym.spaces.Tuple((gym.spaces.Discrete(3), gym.spaces.Discrete(3), gym.spaces.Discrete(3)))  # distance bins to green apple: 0/1/2
+            gym.spaces.Tuple((gym.spaces.Discrete(3),
+                              gym.spaces.Discrete(3),
+                              gym.spaces.Discrete(4))),
+            gym.spaces.Tuple((gym.spaces.Discrete(3),
+                              gym.spaces.Discrete(3),
+                              gym.spaces.Discrete(3)))
         ))
         self.last_reward = 0
         self.state = self._get_obs()
@@ -67,37 +74,52 @@ class Environment(gym.Env):
     def _get_obs(self):
         """
         Returns the current observation of the snake:
-        - a tuple of the elements it can see from its head, clockwise starting from the left, directly adjacent to the head
-        - a tuple indicating the presence of a green apple in the 4 cardinal directions, starting from the left and going clockwise
-        - a tuple indicating the distance to a green apple in the 4 cardinal directions, starting from the left and going clockwise
+        - a tuple of elements visible from head
+        - a tuple of distance to green apple
         """
         if self.game.status == GameStatus.GAME_OVER:
-            return ((Element.DEATH.value, Element.DEATH.value, Element.DEATH.value), (0, 0, 0))
+            return ((Element.DEATH.value,
+                     Element.DEATH.value,
+                     Element.DEATH.value), (0, 0, 0))
         head_position = self.game.snake[0]
         current_direction = self.game.current_direction
         direction_map = {
-            Directions.UP: ((-1, -self.size, +1), (self.game.get_left_row, self.game.get_up_row, self.game.get_right_row)),
-            Directions.DOWN: ((+1, +self.size, -1), (self.game.get_right_row, self.game.get_down_row, self.game.get_left_row)),
-            Directions.LEFT: ((+self.size, -1, -self.size), (self.game.get_down_row, self.game.get_left_row, self.game.get_up_row)),
-            Directions.RIGHT: ((-self.size, +1, +self.size), (self.game.get_up_row, self.game.get_right_row, self.game.get_down_row))
+            Directions.UP: ((-1, -self.size, +1),
+                            (self.game.get_left_row,
+                             self.game.get_up_row,
+                             self.game.get_right_row)),
+            Directions.DOWN: ((+1, +self.size, -1),
+                              (self.game.get_right_row,
+                               self.game.get_down_row,
+                               self.game.get_left_row)),
+            Directions.LEFT: ((+self.size, -1, -self.size),
+                              (self.game.get_down_row,
+                               self.game.get_left_row,
+                               self.game.get_up_row)),
+            Directions.RIGHT: ((-self.size, +1, +self.size),
+                               (self.game.get_up_row,
+                                self.game.get_right_row,
+                                self.game.get_down_row))
         }
         offsets, row_functions = direction_map[current_direction]
-        left_pos, up_pos, right_pos = [head_position + offset for offset in offsets]
+        left_pos, up_pos, right_pos = [
+            head_position + offset for offset in offsets]
         left_row, up_row, right_row = [fn() for fn in row_functions]
         left_element = self._map_element(self.game.board[left_pos])
         up_element = self._map_element(self.game.board[up_pos])
         right_element = self._map_element(self.game.board[right_pos])
 
         adjacents = (left_element, up_element, right_element)
-        # green_apples = (1 if ord('G') in left_row else 0, 1 if ord('G') in up_row else 0, 1 if ord('G') in right_row else 0)
-        distance_to_apples = (self._distance_to_green_apple(left_row), self._distance_to_green_apple(up_row), self._distance_to_green_apple(right_row))
-        # print("distance to green apple in the 3 directions (left, up, right):", distance_to_apples)
+        distance_to_apples = (self._distance_to_green_apple(left_row),
+                              self._distance_to_green_apple(up_row),
+                              self._distance_to_green_apple(right_row))
         return (adjacents, distance_to_apples)
 
     def map_action_to_direction(self, action, current_direction):
-        directions = [Directions.LEFT, Directions.UP, Directions.RIGHT, Directions.DOWN]
+        directions = [Directions.LEFT, Directions.UP,
+                      Directions.RIGHT, Directions.DOWN]
         current_index = directions.index(current_direction)
-        # action 0 = gauche (-1), action 1 = tout droit (0), action 2 = droite (+1)
+        # action 0 = left (-1), action 1 = straight (0), action 2 = right
         offset = action - 1
         new_index = (current_index + offset) % 4
         return directions[new_index]
@@ -116,14 +138,21 @@ class Environment(gym.Env):
 
     def step(self, action):
         self.steps += 1
-        old_min_dist = min([d for d in self.state[1] if d > 0], default=0)
-        action_direction = self.map_action_to_direction(action, self.game.current_direction)
+        old_min_dist = min(
+            [d for d in self.state[1] if d > 0], default=0)
+        if (self.step_by_step and self.interpreter
+                and self.interpreter.display_mode):
+            self.interpreter.wait_for_next(self.game)
+        action_direction = self.map_action_to_direction(
+            action, self.game.current_direction)
         self.game.move_snake(action_direction)
         if self.steps >= self.max_steps:
             self.game.status = GameStatus.GAME_OVER
-        elif self.game.status == GameStatus.GAME_OVER and self.steps < self.max_steps:
+        elif (self.game.status == GameStatus.GAME_OVER
+              and self.steps < self.max_steps):
             self.death_reason = "collision"
-        terminated = self.game.status == GameStatus.GAME_OVER or self.game.status == GameStatus.VICTORY
+        terminated = (self.game.status == GameStatus.GAME_OVER or
+                      self.game.status == GameStatus.VICTORY)
         state = self._get_obs()
         new_min_dist = min([d for d in state[1] if d > 0], default=0)
         reward = 0
@@ -136,7 +165,6 @@ class Environment(gym.Env):
         elif self.game.lastAction == LastAction.RED_APPLE:
             reward = -30
         elif self.game.lastAction == LastAction.MOVE:
-            # reward = -1
             if old_min_dist > 0 and new_min_dist > 0:
                 if new_min_dist < old_min_dist:
                     reward = 5
@@ -153,5 +181,6 @@ class Environment(gym.Env):
         self.state = state
         self.terminated = terminated
         if self.interpreter:
-            self.interpreter.update(state, reward, terminated, self.game)
+            self.interpreter.update(state, reward, terminated, self.game,
+                                    step_by_step=self.step_by_step)
         return state, reward, terminated
